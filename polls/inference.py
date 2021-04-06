@@ -58,3 +58,45 @@ class Inference:
             save_name = save_name[0]+save_name[1].split('.')[0]
             self.submission.to_csv(base+self.nickname+save_name+'.csv')
         return np.asarray(results)
+
+
+def albumentation(size=(224, 224), use_filp=True, use_rotate=True, use_blur=True,
+                  use_noise=True, use_normalize=True, use_CLAHE=True,
+                  use_invert=True, use_equalize=True, use_posterize=True,
+                  use_soloarize=True, ues_jitter=True, use_Brightness=True,
+                  use_Gamma=True, use_brightcontrast=True, use_cutout=True,
+                  use_totensor=True):
+    random_crop = A.RandomCrop(height=size[0], width=size[1], p=1)
+    random_resizecrop = A.RandomResizedCrop(height=size[0], width=size[1])
+    random_filp = A.HorizontalFlip(p=0.5)
+    random_blur = A.GaussianBlur()
+    random_noise = A.GaussNoise()
+    random_rotate = A.Rotate(limit=45, p=0.65)
+    random_CLAHE = A.CLAHE(p=0.4)
+    random_invert = A.InvertImg(always_apply=False)
+    random_equalize = A.Equalize(always_apply=False)
+    random_posterize = A.Posterize(always_apply=False)
+    random_solarize = A.Solarize(always_apply=False)
+    random_jitter = A.ColorJitter(always_apply=False)
+    random_Brightness = A.RandomBrightness(always_apply=False)
+    random_Gamma = A.RandomGamma(always_apply=False)
+    random_brightcontrast = A.RandomBrightnessContrast(always_apply=False)
+    random_cutout = A.Cutout(max_h_size=int(size[0]*0.1), max_w_size=int(size[1]*0.1),always_apply=False)
+
+    normalize = A.Normalize(always_apply=True)
+
+    transforms = np.array([random_crop, random_resizecrop, random_filp,
+                           random_invert, random_equalize, random_posterize,
+                           random_solarize, random_jitter, random_Brightness,
+                           random_Gamma, random_brightcontrast, random_cutout,
+                           random_rotate, random_CLAHE, random_blur,
+                           random_noise,normalize, ToTensorV2()])
+
+    transform_mask = [False, True, use_filp,
+                      use_invert, use_equalize, use_posterize,
+                      use_soloarize, ues_jitter, use_Brightness,
+                      use_Gamma, use_brightcontrast, use_cutout,
+                      use_rotate, use_CLAHE, use_blur,
+                      use_noise, use_normalize, use_totensor ]
+    transforms = A.Compose(transforms[transform_mask])
+    return transforms
